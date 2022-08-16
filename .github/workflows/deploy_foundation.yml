@@ -1,4 +1,4 @@
-name: Deploy
+name: Deploy foundation
 
 on:
   workflow_dispatch:
@@ -7,6 +7,12 @@ on:
         description: Target environment
         default: 'test'
         required: true
+
+env:
+  TF_RESOURCE_GROUP: ''
+  TF_STORAGE_ACCOUNT: ''
+  TF_CONTAINER_NAME: ''
+  TF_STATE_FILE: ''
 
 jobs:
   deploy:
@@ -20,14 +26,41 @@ jobs:
       ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
       ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
 
+    run:
+      working-directory: ./foundation
+
     steps:
-      - name: 'Az CLI login'
-        uses: azure/login@v1
-        with:
-          creds: '{"clientId":"${{ secrets.ARM_CLIENT_ID }}","clientSecret":"${{ secrets.ARM_CLIENT_SECRET }}","subscriptionId":"${{ secrets.ARM_SUBSCRIPTION_ID }}","tenantId":"${{ secrets.ARM_TENANT_ID }}"}'
+      - name: Checkout
+        uses: actions/checkout@v3
       
-      - name: 'Run az commands'
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.2.1
+          terraform_wrapper: false
+      
+      - name: Terraform Init
+        id: init
         run: |
-          az account show
-          az group list
-          pwd 
+          terraform init \
+            -backend-config="resource_group_name=$TF_RESOURCE_GROUP" \
+            -backend-config="storage_account_name=$TF_STORAGE_ACCOUNT" \
+            -backend-config="container_name=$TF_CONTAINER_NAME" \
+            -backend-config="key=$TF_STATE_FILE"
+
+      - name: Terraform fmt
+        id: fmt
+        run: terraform fmt -check
+        continue-on-error: true
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+
+      - name: Terraform Plan
+        id: plan
+        run: terraform plan -no-color -out output.tfplan
+      
+      - name: Terraform Apply
+        id: apply
+        run: terraform apply output.tfplan
