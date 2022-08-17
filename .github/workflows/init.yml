@@ -43,8 +43,8 @@ jobs:
 
           echo "*** Check if Storage Account $STORAGE_ACCOUNT_NAME exists"
           if [[ $(az storage account list --resource-group $RESOURCE_GROUP_NAME --query "[?name=='$STORAGE_ACCOUNT_NAME'] | length(@)") == 0 ]]; then
-            az storage account create --name ${{ parameters.storageAccountName }} \
-                          --resource-group ${{ parameters.resourceGroupName }} \
+            az storage account create --name $STORAGE_ACCOUNT_NAME \
+                          --resource-group $RESOURCE_GROUP_NAME \
                           --https-only true \
                           --sku Standard_LRS \
                           --min-tls-version TLS1_2
