@@ -57,7 +57,7 @@ jobs:
           echo "*** Check if Storage Container tfstate exists"         
           key="$(az storage account keys list -n $STORAGE_ACCOUNT_NAME --query "[0].{value:value}" --output tsv)"
 
-          if [ $(az storage container exists --name tfstate --account-name $STORAGE_ACCOUNT_NAME --account-key $key = false ]; then 
+          if [ $(az storage container exists --name tfstate --account-name $STORAGE_ACCOUNT_NAME --account-key $key) = false ]; then 
             echo "*** WARN! Storage container tfstate does not exist. Creating..."
             az storage container create --name tfstate \
                                     --account-name $STORAGE_ACCOUNT_NAME \
