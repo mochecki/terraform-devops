@@ -36,6 +36,7 @@ jobs:
 
           echo "*** Check if Resource Group $RESOURCE_GROUP_NAME exists"
           if [ $(az group exists --name $RESOURCE_GROUP_NAME) = false ]; then 
+            echo "*** WARN! Resource Group $RESOURCE_GROUP_NAME does not exist. Creating..."
             az group create --name $RESOURCE_GROUP_NAME --location "$RESOURCE_LOCATION" 
           else
             echo "*** Ok"
@@ -43,6 +44,7 @@ jobs:
 
           echo "*** Check if Storage Account $STORAGE_ACCOUNT_NAME exists"
           if [[ $(az storage account list --resource-group $RESOURCE_GROUP_NAME --query "[?name=='$STORAGE_ACCOUNT_NAME'] | length(@)") == 0 ]]; then
+            echo "*** WARN! Storage account $STORAGE_ACCOUNT_NAME does not exist. Creating..."
             az storage account create --name $STORAGE_ACCOUNT_NAME \
                           --resource-group $RESOURCE_GROUP_NAME \
                           --https-only true \
