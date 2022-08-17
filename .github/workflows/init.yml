@@ -8,6 +8,9 @@ on:
         default: 'test'
         required: true
 
+env:
+  RESOURCE_LOCATION: 'West Europe'
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -19,6 +22,8 @@ jobs:
       ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
       ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
       ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      RESOURCE_GROUP_NAME: 'RG-TF-STATE-001-DEV'
+      STORAGE_ACCOUNT_NAME: 'stmoclocaldev01'
 
     steps:
       - name: 'Az CLI login'
@@ -28,6 +33,21 @@ jobs:
       
       - name: 'Run az commands'
         run: |
-          az account show
-          az group list
-          pwd 
+
+          echo "*** Check if Resource Group $RESOURCE_GROUP_NAME exists"
+          if [ $(az group exists --name $RESOURCE_GROUP_NAME) = false ]; then 
+            az group create --name $RESOURCE_GROUP_NAME --location "$RESOURCE_LOCATION" 
+          else
+            echo "*** Ok"
+          fi
+
+          echo "*** Check if Storage Account $STORAGE_ACCOUNT_NAME exists"
+          if [[ $(az storage account list --resource-group $RESOURCE_GROUP_NAME --query "[?name=='$STORAGE_ACCOUNT_NAME'] | length(@)") == 0 ]]; then
+            az storage account create --name ${{ parameters.storageAccountName }} \
+                          --resource-group ${{ parameters.resourceGroupName }} \
+                          --https-only true \
+                          --sku Standard_LRS \
+                          --min-tls-version TLS1_2
+          else
+            echo "*** Ok"
+          fi
