@@ -1,4 +1,4 @@
-name: Deploy TF state
+name: Setup TF state store
 
 on:
   workflow_dispatch:
@@ -50,6 +50,21 @@ jobs:
                           --https-only true \
                           --sku Standard_LRS \
                           --min-tls-version TLS1_2
+          else
+            echo "*** Ok"
+          fi
+
+          echo "*** Check if Storage Container tfstate exists"
+          CONTAINER_NAME = "tfstate"
+          
+          key="$(az storage account keys list -n $STORAGE_ACCOUNT_NAME --query "[0].{value:value}" --output tsv)"
+
+          if [ $(az storage container exists --name $CONTAINER_NAME --account-name $STORAGE_ACCOUNT_NAME --account-key $key = false ]; then 
+            echo "*** WARN! Storage container tfstate does not exist. Creating..."
+            az storage container create --name $CONTAINER_NAME \
+                                    --account-name $STORAGE_ACCOUNT_NAME \
+                                    --public-access off \
+                                    --account-key $key
           else
             echo "*** Ok"
           fi
