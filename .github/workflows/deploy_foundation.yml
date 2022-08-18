@@ -1,70 +1,20 @@
-name: Deploy foundation
+name: Setup TF state store INT
 
 on:
   workflow_dispatch:
-    inputs:
-      environment:
-        description: Target environment
-        default: 'test'
-        required: true
 
-env:
-  TF_CONTAINER_NAME: 'tfstate'
-  TF_STATE_FILE: 'foundation.tfstate'
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    name: Deploy INT
+    uses: ./.github/workflows/_template_deploy_foundation.yml
+    with: 
+      environment: 'test'
+      resource_group: 'rg-moc-tfstate-we-dev-001'
+      storage_account: 'stmoctfstatedev001'
+      tfvar_file: 'env-int.tfvars'
+      container_name: 'tfstate'
+      state_file: 'foundation123.tfstate'
+    secrets: inherit
+    
 
-    environment: ${{ github.event.inputs.environment }}
-
-    env: 
-      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-      TF_RESOURCE_GROUP: ${{ secrets.TF_RESOURCE_GROUP }}
-      TF_STORAGE_ACCOUNT: ${{ secrets.TF_STORAGE_ACCOUNT }}
-
-    defaults:
-      run:
-        working-directory: ./foundation
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-      
-      - name: Install Terraform
-        uses: hashicorp/setup-terraform@v1
-        with:
-          terraform_version: 1.2.1
-          terraform_wrapper: false
-      
-      - name: Terraform Init
-        id: init
-        run: |
-          terraform init \
-            -backend-config="resource_group_name=$TF_RESOURCE_GROUP" \
-            -backend-config="storage_account_name=$TF_STORAGE_ACCOUNT" \
-            -backend-config="container_name=$TF_CONTAINER_NAME" \
-            -backend-config="key=$TF_STATE_FILE"
-
-      - name: Terraform fmt
-        id: fmt
-        run: terraform fmt -check
-        continue-on-error: true
-
-      - name: Terraform Validate
-        id: validate
-        run: terraform validate -no-color
-
-      - name: Terraform Plan
-        id: plan
-        run: terraform plan -no-color -out output.tfplan
-      
-      - name: Terraform Apply
-        id: apply
-        run: terraform apply output.tfplan
-
-  call-workflow-2-in-local-repo:
-    uses: ./.github/workflows/workflow_foundation.yml
