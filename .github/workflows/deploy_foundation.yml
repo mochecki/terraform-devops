@@ -9,10 +9,8 @@ on:
         required: true
 
 env:
-  TF_RESOURCE_GROUP: ''
-  TF_STORAGE_ACCOUNT: ''
-  TF_CONTAINER_NAME: ''
-  TF_STATE_FILE: ''
+  TF_CONTAINER_NAME: 'tfstate'
+  TF_STATE_FILE: 'foundation.tfstate'
 
 jobs:
   deploy:
@@ -25,6 +23,8 @@ jobs:
       ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
       ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
       ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+      TF_RESOURCE_GROUP: ${{ secrets.TF_RESOURCE_GROUP }}
+      TF_STORAGE_ACCOUNT: ${{ secrets.TF_STORAGE_ACCOUNT }}
 
     run:
       working-directory: ./foundation
