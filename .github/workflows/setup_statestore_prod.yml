@@ -1,0 +1,16 @@
+name: Setup TF state store PROD
+
+on:
+  workflow_dispatch:
+
+env:
+  RESOURCE_LOCATION: 'West Europe'
+
+jobs:
+  deploy:
+    uses: ./.github/workflows/workflow_setup_statestore.yml
+    with: 
+      environment: 'prod'
+    secrets: inherit
+    
+
