@@ -2,11 +2,17 @@ name: Reusable workflow example
 
 on:
   workflow_call:
-  
+    inputs:
+      environment:
+        required: true
+        type: string
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     
+    environment: ${{ input.environment }}
+
     env: 
       ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
       ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
