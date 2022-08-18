@@ -1,7 +1,7 @@
 name: _template_deploy_foundation
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       environment:
         required: true
