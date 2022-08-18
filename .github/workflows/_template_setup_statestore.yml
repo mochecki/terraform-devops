@@ -6,6 +6,12 @@ on:
       environment:
         required: true
         type: string
+      resource_group:
+        required: true
+        type: string
+      storage_account:
+        required: true
+        type: string
 
 jobs:
   setup-state-store:
@@ -18,8 +24,8 @@ jobs:
       ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
       ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
       ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-      RESOURCE_GROUP_NAME: ${{ secrets.TF_RESOURCE_GROUP }}
-      STORAGE_ACCOUNT_NAME: ${{ secrets.TF_STORAGE_ACCOUNT }}
+      RESOURCE_GROUP_NAME: ${{ inputs.resource_group }}
+      STORAGE_ACCOUNT_NAME: ${{ inputs.storage_account }}
 
     steps:
       - name: 'Az CLI login'
