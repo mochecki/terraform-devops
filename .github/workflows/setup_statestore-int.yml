@@ -14,7 +14,7 @@ jobs:
     uses: ./.github/workflows/_template_setup_statestore.yml
     with: 
       environment: 'test'
-      resource_group: $RESOURCE_GROUP
+      resource_group: {{ $env.RESOURCE_GROUP }}
       storage_account: $STORAGE_ACCOUNT
       resource_location: $RESOURCE_LOCATION
     secrets: inherit
