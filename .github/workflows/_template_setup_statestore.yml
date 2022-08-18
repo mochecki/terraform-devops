@@ -1,4 +1,4 @@
-name: _setup_statestore
+name: _template_setup_statestore
 
 on:
   workflow_call:
@@ -8,7 +8,7 @@ on:
         type: string
 
 jobs:
-  deploy:
+  setup-state-store:
     runs-on: ubuntu-latest
     
     environment: ${{ inputs.environment }}

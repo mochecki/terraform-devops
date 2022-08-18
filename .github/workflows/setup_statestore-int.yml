@@ -8,6 +8,7 @@ env:
 
 jobs:
   deploy:
+    name: Deploy INT
     uses: ./.github/workflows/workflow_setup_statestore.yml
     with: 
       environment: 'test'
