@@ -65,3 +65,6 @@ jobs:
       - name: Terraform Apply
         id: apply
         run: terraform apply output.tfplan
+
+  call-workflow-2-in-local-repo:
+    uses: ./.github/workflows/workflow_foundation.yml

@@ -12,79 +12,15 @@ env:
   RESOURCE_LOCATION: 'West Europe'
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
+  deploy-test:
+    uses: ./.github/workflows/workflow_setup_statestore.yml
+    environment: 'test'
+    secrets: inherit
+
+  deploy-prod:
+    uses: ./.github/workflows/workflow_setup_statestore.yml
+    needs: [deploy-test]
+    environment: 'prod'
+    secrets: inherit
     
-    environment: ${{ github.event.inputs.environment }}
 
-    env: 
-      ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-      ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-      ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-      ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-      RESOURCE_GROUP_NAME: ${{ secrets.TF_RESOURCE_GROUP }}
-      STORAGE_ACCOUNT_NAME: ${{ secrets.TF_STORAGE_ACCOUNT }}
-
-    steps:
-      - name: 'Az CLI login'
-        uses: azure/login@v1
-        with:
-          creds: '{"clientId":"${{ secrets.ARM_CLIENT_ID }}","clientSecret":"${{ secrets.ARM_CLIENT_SECRET }}","subscriptionId":"${{ secrets.ARM_SUBSCRIPTION_ID }}","tenantId":"${{ secrets.ARM_TENANT_ID }}"}'
-      
-      - name: 'Run az commands'
-        shell: pwsh
-        run: |
-          echo "*** Check if Resource Group ${env:RESOURCE_GROUP_NAME} exists"
-          $checkRg = az group exists --name ${env:RESOURCE_GROUP_NAME} | ConvertFrom-Json
-          if (!$checkRg) {
-            Write-Warning "*** WARN! Resource Group ${env:RESOURCE_GROUP_NAME} does not exist. Creating..."
-
-            az group create --name ${env:RESOURCE_GROUP_NAME} --location "${env:RESOURCE_LOCATION}"
-            if ($LastExitCode -ne 0) {
-              throw "*** Error - could not create resource group"
-            }
-          }
-          else
-          {
-            echo "*** Ok"
-          }
-          echo "*** Check if Storage Account ${env:STORAGE_ACCOUNT_NAME} exists"
-          $check = az storage account show --name ${env:STORAGE_ACCOUNT_NAME} `
-                                          --resource-group ${env:RESOURCE_GROUP_NAME} | ConvertFrom-Json
-          if (!$check) {
-            Write-Warning "*** WARN! Storage Account ${env:STORAGE_ACCOUNT_NAME} does not exist. Creating..."
-            az storage account create --name ${env:STORAGE_ACCOUNT_NAME} `
-                                      --resource-group ${env:RESOURCE_GROUP_NAME} `
-                                      --https-only true `
-                                      --sku Standard_GZRS `
-                                      --min-tls-version TLS1_2
-            if ($LastExitCode -ne 0) {
-              throw "*** Error - could not create storage account"
-            }
-          }
-          else
-          {
-            echo "*** Ok"
-          }
-
-          $terraformContainerName = "tfstate"
-          echo "*** Check if Container $terraformContainerName exists"
-
-          $key = az storage account keys list -n ${env:STORAGE_ACCOUNT_NAME} -g ${env:RESOURCE_GROUP_NAME} --query "[0].{value:value}" --output tsv
-          $check = az storage container exists --account-name ${env:STORAGE_ACCOUNT_NAME} --account-key $key`
-                                              --name $terraformContainerName | ConvertFrom-Json
-          if (!$check.exists) {
-            Write-Warning "*** WARN! Container $terraformContainerName does not exist. Creating..."
-            az storage container create --name $terraformContainerName `
-                                        --account-name ${env:STORAGE_ACCOUNT_NAME} `
-                                        --public-access off `
-                                        --account-key $key
-
-            if ($LastExitCode -ne 0) {
-              throw "*** Error - could not create storage container"
-            }
-          }
-          else
-          {
-            echo "*** Ok"
-          }
