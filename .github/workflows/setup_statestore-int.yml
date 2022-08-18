@@ -14,7 +14,7 @@ jobs:
       environment: 'test'
       resource_group: 'rg-moc-tfstate-we-dev-001'
       storage_account: 'stmoctfstatedev001'
-      resource_location: {{ $env.RESOURCE_LOCATION }}
+      resource_location: $RESOURCE_LOCATION
     secrets: inherit
     
 
