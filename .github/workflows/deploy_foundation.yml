@@ -26,8 +26,9 @@ jobs:
       TF_RESOURCE_GROUP: ${{ secrets.TF_RESOURCE_GROUP }}
       TF_STORAGE_ACCOUNT: ${{ secrets.TF_STORAGE_ACCOUNT }}
 
-    run:
-      working-directory: ./foundation
+    defaults:
+      run:
+        working-directory: ./foundation
 
     steps:
       - name: Checkout
