@@ -66,3 +66,25 @@ jobs:
           {
             echo "*** Ok"
           }
+
+          $terraformContainerName = "tfstate"
+          echo "*** Check if Container $terraformContainerName exists"
+
+          $key = az storage account keys list -n ${env:STORAGE_ACCOUNT_NAME} -g ${env:RESOURCE_GROUP_NAME} --query "[0].{value:value}" --output tsv
+          $check = az storage container exists --account-name ${env:STORAGE_ACCOUNT_NAME} --account-key $key`
+                                              --name $terraformContainerName | ConvertFrom-Json
+          if (!$check.exists) {
+            Write-Warning "*** WARN! Container $terraformContainerName does not exist. Creating..."
+            az storage container create --name $terraformContainerName `
+                                        --account-name ${env:STORAGE_ACCOUNT_NAME} `
+                                        --public-access off `
+                                        --account-key $key
+
+            if ($LastExitCode -ne 0) {
+              throw "*** Error - could not create storage container"
+            }
+          }
+          else
+          {
+            echo "*** Ok"
+          }
