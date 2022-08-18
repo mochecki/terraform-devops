@@ -32,37 +32,71 @@ jobs:
           creds: '{"clientId":"${{ secrets.ARM_CLIENT_ID }}","clientSecret":"${{ secrets.ARM_CLIENT_SECRET }}","subscriptionId":"${{ secrets.ARM_SUBSCRIPTION_ID }}","tenantId":"${{ secrets.ARM_TENANT_ID }}"}'
       
       - name: 'Run az commands'
+        shell: pwsh
         run: |
+          # echo "*** Check if Resource Group $RESOURCE_GROUP_NAME exists"
+          # if [ $(az group exists --name $RESOURCE_GROUP_NAME) = false ]; then 
+          #   echo "*** WARN! Resource Group $RESOURCE_GROUP_NAME does not exist. Creating..."
+          #   az group create --name $RESOURCE_GROUP_NAME --location "$RESOURCE_LOCATION" 
+          # else
+          #   echo "*** Ok"
+          # fi
+
+          # echo "*** Check if Storage Account $STORAGE_ACCOUNT_NAME exists"
+          # if [[ $(az storage account list --resource-group $RESOURCE_GROUP_NAME --query "[?name=='$STORAGE_ACCOUNT_NAME'] | length(@)") == 0 ]]; then
+          #   echo "*** WARN! Storage account $STORAGE_ACCOUNT_NAME does not exist. Creating..."
+          #   az storage account create --name $STORAGE_ACCOUNT_NAME \
+          #                 --resource-group $RESOURCE_GROUP_NAME \
+          #                 --https-only true \
+          #                 --sku Standard_LRS \
+          #                 --min-tls-version TLS1_2
+          # else
+          #   echo "*** Ok"
+          # fi
+
+          # echo "*** Check if Storage Container tfstate exists"         
+          # key="$(az storage account keys list -n $STORAGE_ACCOUNT_NAME --query "[0].{value:value}" --output tsv)"
+
+          # if [ $(az storage container exists --name tfstate --account-name $STORAGE_ACCOUNT_NAME --account-key $key) == "False" ]; then 
+          #   echo "*** WARN! Storage container tfstate does not exist. Creating..."
+          #   az storage container create --name tfstate \
+          #                           --account-name $STORAGE_ACCOUNT_NAME \
+          #                           --public-access off \
+          #                           --account-key $key
+          # else
+          #   echo "*** Ok"
+          # fi
+
 
           echo "*** Check if Resource Group $RESOURCE_GROUP_NAME exists"
-          if [ $(az group exists --name $RESOURCE_GROUP_NAME) = false ]; then 
-            echo "*** WARN! Resource Group $RESOURCE_GROUP_NAME does not exist. Creating..."
-            az group create --name $RESOURCE_GROUP_NAME --location "$RESOURCE_LOCATION" 
-          else
-            echo "*** Ok"
-          fi
+          $checkRg = az group exists --name $RESOURCE_GROUP_NAME | ConvertFrom-Json
+          if (!$checkRg) {
+            Write-Warning "*** WARN! Resource Group $RESOURCE_GROUP_NAME does not exist. Creating..."
 
+            az group create --name $RESOURCE_GROUP_NAME --location "$RESOURCE_LOCATION"
+            if ($LastExitCode -ne 0) {
+              throw "*** Error - could not create resource group"
+            }
+          }
+          else
+          {
+            echo "*** Ok"
+          }
           echo "*** Check if Storage Account $STORAGE_ACCOUNT_NAME exists"
-          if [[ $(az storage account list --resource-group $RESOURCE_GROUP_NAME --query "[?name=='$STORAGE_ACCOUNT_NAME'] | length(@)") == 0 ]]; then
-            echo "*** WARN! Storage account $STORAGE_ACCOUNT_NAME does not exist. Creating..."
-            az storage account create --name $STORAGE_ACCOUNT_NAME \
-                          --resource-group $RESOURCE_GROUP_NAME \
-                          --https-only true \
-                          --sku Standard_LRS \
-                          --min-tls-version TLS1_2
+          $check = az storage account show --name $STORAGE_ACCOUNT_NAME `
+                                          --resource-group $RESOURCE_GROUP_NAME | ConvertFrom-Json
+          if (!$check) {
+            Write-Warning "*** WARN! Storage Account $STORAGE_ACCOUNT_NAME does not exist. Creating..."
+            az storage account create --name $STORAGE_ACCOUNT_NAME `
+                                      --resource-group $RESOURCE_GROUP_NAME `
+                                      --https-only true `
+                                      --sku Standard_GZRS `
+                                      --min-tls-version TLS1_2
+            if ($LastExitCode -ne 0) {
+              throw "*** Error - could not create storage account"
+            }
+          }
           else
+          {
             echo "*** Ok"
-          fi
-
-          echo "*** Check if Storage Container tfstate exists"         
-          key="$(az storage account keys list -n $STORAGE_ACCOUNT_NAME --query "[0].{value:value}" --output tsv)"
-
-          if [ $(az storage container exists --name tfstate --account-name $STORAGE_ACCOUNT_NAME --account-key $key) = false ]; then 
-            echo "*** WARN! Storage container tfstate does not exist. Creating..."
-            az storage container create --name tfstate \
-                                    --account-name $STORAGE_ACCOUNT_NAME \
-                                    --public-access off \
-                                    --account-key $key
-          else
-            echo "*** Ok"
-          fi
+          }
