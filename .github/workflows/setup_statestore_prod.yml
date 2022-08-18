@@ -8,8 +8,8 @@ env:
 
 jobs:
   deploy:
-    name: PROD
-    uses: ./.github/workflows/workflow_setup_statestore.yml
+    name: Deploy PROD
+    uses: ./.github/workflows/_template_setup_statestore.yml
     with: 
       environment: 'prod'
     secrets: inherit
