@@ -12,6 +12,9 @@ on:
       storage_account:
         required: true
         type: string
+      resource_location:
+        required: true
+        type: string
 
 jobs:
   setup-state-store:
@@ -24,8 +27,6 @@ jobs:
       ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
       ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
       ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-      RESOURCE_GROUP_NAME: ${{ inputs.resource_group }}
-      STORAGE_ACCOUNT_NAME: ${{ inputs.storage_account }}
 
     steps:
       - name: 'Az CLI login'
@@ -36,12 +37,12 @@ jobs:
       - name: 'Run az commands'
         shell: pwsh
         run: |
-          echo "*** Check if Resource Group ${env:RESOURCE_GROUP_NAME} exists"
-          $checkRg = az group exists --name ${env:RESOURCE_GROUP_NAME} | ConvertFrom-Json
+          echo "*** Check if Resource Group ${{ inputs.resource_group }} exists"
+          $checkRg = az group exists --name ${{ inputs.resource_group }} | ConvertFrom-Json
           if (!$checkRg) {
-            Write-Warning "*** WARN! Resource Group ${env:RESOURCE_GROUP_NAME} does not exist. Creating..."
+            Write-Warning "*** WARN! Resource Group ${{ inputs.resource_group }} does not exist. Creating..."
 
-            az group create --name ${env:RESOURCE_GROUP_NAME} --location "${env:RESOURCE_LOCATION}"
+            az group create --name ${{ inputs.resource_group }} --location "${{ inputs.resource_location }}"
             if ($LastExitCode -ne 0) {
               throw "*** Error - could not create resource group"
             }
@@ -50,13 +51,13 @@ jobs:
           {
             echo "*** Ok"
           }
-          echo "*** Check if Storage Account ${env:STORAGE_ACCOUNT_NAME} exists"
-          $check = az storage account show --name ${env:STORAGE_ACCOUNT_NAME} `
-                                          --resource-group ${env:RESOURCE_GROUP_NAME} | ConvertFrom-Json
+          echo "*** Check if Storage Account ${{ inputs.storage_account }} exists"
+          $check = az storage account show --name ${{ inputs.storage_account }} `
+                                          --resource-group ${{ inputs.resource_group }} | ConvertFrom-Json
           if (!$check) {
-            Write-Warning "*** WARN! Storage Account ${env:STORAGE_ACCOUNT_NAME} does not exist. Creating..."
-            az storage account create --name ${env:STORAGE_ACCOUNT_NAME} `
-                                      --resource-group ${env:RESOURCE_GROUP_NAME} `
+            Write-Warning "*** WARN! Storage Account ${{ inputs.storage_account }} does not exist. Creating..."
+            az storage account create --name ${{ inputs.storage_account }} `
+                                      --resource-group ${{ inputs.resource_group }} `
                                       --https-only true `
                                       --sku Standard_GZRS `
                                       --min-tls-version TLS1_2
@@ -72,13 +73,13 @@ jobs:
           $terraformContainerName = "tfstate"
           echo "*** Check if Container $terraformContainerName exists"
 
-          $key = az storage account keys list -n ${env:STORAGE_ACCOUNT_NAME} -g ${env:RESOURCE_GROUP_NAME} --query "[0].{value:value}" --output tsv
-          $check = az storage container exists --account-name ${env:STORAGE_ACCOUNT_NAME} --account-key $key`
+          $key = az storage account keys list -n ${{ inputs.storage_account }} -g ${{ inputs.resource_group }} --query "[0].{value:value}" --output tsv
+          $check = az storage container exists --account-name ${{ inputs.storage_account }} --account-key $key`
                                               --name $terraformContainerName | ConvertFrom-Json
           if (!$check.exists) {
             Write-Warning "*** WARN! Container $terraformContainerName does not exist. Creating..."
             az storage container create --name $terraformContainerName `
-                                        --account-name ${env:STORAGE_ACCOUNT_NAME} `
+                                        --account-name ${{ inputs.storage_account }} `
                                         --public-access off `
                                         --account-key $key
 
