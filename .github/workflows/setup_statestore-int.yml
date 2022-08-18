@@ -4,6 +4,8 @@ on:
   workflow_dispatch:
 
 env:
+  RESOURCE_GROUP: 'rg-moc-tfstate-we-dev-001'
+  STORAGE_ACCOUNT: 'stmoctfstatedev001'
   RESOURCE_LOCATION: 'West Europe'
 
 jobs:
@@ -12,8 +14,8 @@ jobs:
     uses: ./.github/workflows/_template_setup_statestore.yml
     with: 
       environment: 'test'
-      resource_group: 'rg-moc-tfstate-we-dev-001'
-      storage_account: 'stmoctfstatedev001'
+      resource_group: $RESOURCE_GROUP
+      storage_account: $STORAGE_ACCOUNT
       resource_location: $RESOURCE_LOCATION
     secrets: inherit
     
