@@ -4,3 +4,5 @@ resource "azurerm_resource_group" "shared_rg" {
 }
 
 ##TEST
+
+## TEST 2
