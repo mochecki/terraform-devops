@@ -1,0 +1,9 @@
+steps:
+- task: Bash@3
+  displayName: 'install unzip'
+  inputs:
+    targetType: 'inline'
+    script: |
+      sudo apt-get -y install unzip
+      
+      echo 'installing unzip'

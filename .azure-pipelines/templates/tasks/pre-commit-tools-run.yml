@@ -1,0 +1,9 @@
+steps:
+  - task: Bash@3
+    displayName: 'validate configuration'
+    inputs:
+      targetType: 'inline'
+      script: |
+              export PATH=$HOME/.local/bin:/home/vsts/.local/bin:/opt/pipx_bin:/home/vsts/.cargo/bin:/home/vsts/.config/composer/vendor/bin:/usr/local/.ghcup/bin:/home/vsts/.dotnet/tools:/snap/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/agent/_work/_tool/terraform/1.3.7/x64
+              terraform version
+              pre-commit run --all-files

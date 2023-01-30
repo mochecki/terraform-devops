@@ -1,0 +1,13 @@
+steps:
+  - task: Bash@3
+    displayName: 'install pre-commit'
+    inputs:
+      targetType: 'inline'
+      script: |
+              echo $PATH
+              sudo apt-get install -y --no-install-recommends python3-pip
+              #export PATH="$PATH:$HOME/.local/bin"
+              export PATH=$HOME/.local/bin:/home/vsts/.local/bin:/opt/pipx_bin:/home/vsts/.cargo/bin:/home/vsts/.config/composer/vendor/bin:/usr/local/.ghcup/bin:/home/vsts/.dotnet/tools:/snap/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/agent/_work/_tool/terraform/1.3.7/x64
+              pip install setuptools
+              pip install pre-commit
+              pre-commit install
