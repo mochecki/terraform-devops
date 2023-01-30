@@ -5,12 +5,6 @@ resource "azurerm_resource_group" "shared_rg" {
 
 ##TEST
 
-## TEST 2
-
-## Test 3
-
-## Test 5
-
 resource "azurerm_resource_group" "shared_rg" {
   
 }
