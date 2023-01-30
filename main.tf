@@ -9,6 +9,8 @@ resource "azurerm_resource_group" "shared_rg" {
 
 ## Test 3
 
+## Test 5
+
 resource "azurerm_resource_group" "shared_rg" {
   
 }
