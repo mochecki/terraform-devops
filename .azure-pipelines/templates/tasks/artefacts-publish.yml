@@ -13,7 +13,7 @@ steps:
       testRunTitle: "Checkov Results"
       failTaskOnFailedTests: true
       testResultsFormat: "JUnit"
-      testResultsFiles: "checkov-report.xml"
+      testResultsFiles: "results_junitxml.xml"
       searchFolder: "$(System.DefaultWorkingDirectory)"
     displayName: "Publish Test results"
   - task: CopyFiles@2

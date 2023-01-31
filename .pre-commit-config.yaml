@@ -3,9 +3,12 @@ repos:
     rev: v0.1.17 # Get the latest from: https://github.com/gruntwork-io/pre-commit/releases
     hooks:
       - id: terraform-fmt
+        verbose: true
       - id: terraform-validate
+        verbose: true
   - repo: https://github.com/bridgecrewio/checkov.git
     rev: 2.2.139 # change to tag or sha
     hooks:
       - id: checkov
-        entry: checkov -d . -o junitxml --output-file-path checkov-report.xml
+        entry: checkov -d . -o junitxml --output-file-path .
+        verbose: true
