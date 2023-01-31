@@ -20,7 +20,6 @@ steps:
     displayName: 'copy build artefacts'
     inputs:
       sourceFolder: '$(Build.SourcesDirectory)'
-      contents: ${{ parameters.publish_artifact_contents }}
       targetFolder: '$(Build.ArtifactStagingDirectory)'
   - task: PublishBuildArtifacts@1
     displayName: 'publish build artefacts'
