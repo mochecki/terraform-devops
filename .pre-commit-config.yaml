@@ -8,3 +8,4 @@ repos:
     rev: 2.2.139 # change to tag or sha
     hooks:
       - id: checkov
+        args: [-o junitxms > scan-result.xml]
