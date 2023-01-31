@@ -8,4 +8,4 @@ repos:
     rev: 2.2.139 # change to tag or sha
     hooks:
       - id: checkov
-        args: [-o, junitxml, >result.xml]
+        entry: checkov -d . -o junitxml > $(System.DefaultWorkingDirectory)/checkov-report.xml
