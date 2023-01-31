@@ -1,0 +1,15 @@
+trigger: none
+
+
+
+stages:
+- stage: build
+  displayName: Build stage
+  jobs:
+  - template: 'templates/build.yml'
+    parameters:
+      publish_artifact_contents: |
+                                .terraform.lock.hcl
+                                *.tf
+                                modules/**
+  

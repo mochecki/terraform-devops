@@ -1,0 +1,6 @@
+steps:
+  - task: Bash@3
+    displayName: 'install cli'
+    inputs:
+      targetType: 'inline'
+      script: 'curl -sL https://aka.ms/InstallAzureCLIDeb|sudo bash'

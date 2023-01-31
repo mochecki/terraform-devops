@@ -1,0 +1,8 @@
+steps:
+  - task: InstallSSHKey@0
+    displayName: 'configure github deploy keys (terraform-private-modules)'
+    inputs:
+      knownHostsEntry: $(KnownHostsEntry)
+      sshKeySecureFile: id_ed25519
+  - script: 'ssh-keyscan -H github.com >> ~/.ssh/known_hosts'
+    displayName: 'Add github to known hosts'

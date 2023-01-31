@@ -1,0 +1,28 @@
+parameters:
+- name: publish_artifact_name
+  displayName: 'Publish artifact name'
+  type: string
+  default: drop
+- name: publish_artifact_contents
+  displayName: 'Publish artifact contents file paths'
+  type: string
+
+steps:
+  - task: PublishTestResults@2
+    inputs:
+      testRunTitle: "Checkov Results"
+      failTaskOnFailedTests: true
+      testResultsFormat: "JUnit"
+      testResultsFiles: "results_junitxml.xml"
+      searchFolder: "$(System.DefaultWorkingDirectory)"
+    displayName: "Publish Test results"
+  - task: CopyFiles@2
+    displayName: 'copy build artefacts'
+    inputs:
+      sourceFolder: '$(Build.SourcesDirectory)'
+      targetFolder: '$(Build.ArtifactStagingDirectory)'
+  - task: PublishBuildArtifacts@1
+    displayName: 'publish build artefacts'
+    inputs:
+      pathToPublish: '$(Build.ArtifactStagingDirectory)'
+      artifactName: ${{ parameters.publish_artifact_name }}
