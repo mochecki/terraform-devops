@@ -8,6 +8,14 @@ parameters:
   type: string
 
 steps:
+  - task: PublishTestResults@2
+    inputs:
+      testRunTitle: "Checkov Results"
+      failTaskOnFailedTests: true
+      testResultsFormat: "JUnit"
+      testResultsFiles: "checkov-report.xml"
+      searchFolder: "$(System.DefaultWorkingDirectory)"
+    displayName: "Publish Test results"
   - task: CopyFiles@2
     displayName: 'copy build artefacts'
     inputs:
