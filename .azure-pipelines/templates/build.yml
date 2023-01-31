@@ -26,7 +26,7 @@ parameters:
 
 jobs:
 - job: build
-  displayName: build
+  displayName: Build job
   pool: 
     name: ${{ parameters.agent_pool_name }}
     ${{ if eq(parameters.agent_pool_name, 'Azure pipelines') }}:
